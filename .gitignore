@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.pdf
+*.zip
+
+# excluding folder
+.venv
+
 # C extensions
 *.so
 
