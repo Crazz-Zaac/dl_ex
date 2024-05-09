@@ -10,14 +10,14 @@ from skimage.transform import resize
 class ImageGenerator:
     def __init__(
         self,
-        file_path,
-        label_path,
-        batch_size,
-        image_size,
+        file_path: str,
+        label_path: str ,
+        batch_size: int,
+        image_size: list[int],
         rotation=False,
         mirroring=False,
         shuffle=False,
-    ):
+    ) -> None:
         # Define all members of your generator class object as global members here.
         # These need to include:
         # the batch size
@@ -60,7 +60,7 @@ class ImageGenerator:
         self.indices = np.arange(self.data_size) # generating indices until the data size
         
 
-    def next(self):
+    def next(self) -> tuple:
         # This function creates a batch of images and corresponding labels and returns them.
         # In this context a "batch" of images just means a bunch, say 10 images that are forwarded at once.
         # Note that your amount of total data might not be divisible without remainder with the batch_size.
@@ -97,13 +97,13 @@ class ImageGenerator:
             self.current_index += 1
         return np.array(images), np.array(labels).astype(int)
 
-    def rotate(self, img):
+    def rotate(self, img) -> np.ndarray:
         return np.rot90(img)
     
-    def mirror(self, img):
+    def mirror(self, img) -> np.ndarray:
         return np.fliplr(img)
     
-    def augment(self, img):
+    def augment(self, img) -> np.ndarray:
         
         # this function takes a single image as an input and performs a random transformation
         # (mirroring and/or rotation) on it and outputs the transformed image
@@ -115,16 +115,16 @@ class ImageGenerator:
             img = self.mirror(img)
         return img
 
-    def current_epoch(self):
+    def current_epoch(self) -> int:
         # return the current epoch number
         return self.curr_epoch
 
-    def class_name(self, x):
+    def class_name(self, x) -> str:
         # This function returns the class name for a specific input
         # TODO: implement class name function
         return self.class_dict[x]
 
-    def show(self):
+    def show(self) -> None:
         # In order to verify that the generator creates batches as required, this functions calls next to get a
         # batch of images and labels and visualizes it.
         # TODO: implement show method
