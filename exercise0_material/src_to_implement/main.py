@@ -1,11 +1,16 @@
 from pattern import Checker, Circle, Spectrum
+from generator import ImageGenerator
 
 if __name__ == "__main__":
 
-    checker_board = Checker(6250, 250)
-    checker_board.draw()
-    checker_board.show()
-
+    # checker_board = Checker(1000, 50)
+    # checker_board.draw()
+    # checker_board.show()
+    
+    generator = ImageGenerator("data/exercise_data/", "data/Labels.json", 
+                               5, [32,32, 3], True, True)
+    generator.next()
+    generator.show()
     # circle = Circle(6250, 250, (3125, 3125))
     # circle.draw()
     # circle.show()
