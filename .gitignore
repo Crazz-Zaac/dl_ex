@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.vscode/
 
 *.pdf
 *.zip
+
+DL_Solutions/
 
 # excluding folder
 .venv
