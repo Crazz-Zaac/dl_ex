@@ -128,11 +128,31 @@ class ImageGenerator:
         # In order to verify that the generator creates batches as required, this functions calls next to get a
         # batch of images and labels and visualizes it.
         # TODO: implement show method
+        
+        num_images = self.batch_size
+        # calculate the number of rows required to display the images
+        num_rows = (num_images // 2) + (num_images % 2)
+        num_cols = 4
+        
+        # creating a figure with subplots to display the images and labels
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(10, 10))
         batch = self.next()
-        for i in range(4):
-            plt.imshow(batch[0][i])
-            plt.title(self.class_name(batch[1][i]))
-            plt.show()
+        
+        for i in range(num_images):
+            row = i // num_cols
+            col = i % num_cols
+            axes[row, col].imshow(batch[0][i])
+            axes[row, col].set_title(self.class_name(batch[1][i]))
+            axes[row, col].axis("off")
+        
+        # hiding the remaining axes
+        for i in range(num_images, num_rows*4):
+            row = i // num_cols
+            col = i % num_cols
+            fig.delaxes(axes[row, col])
+        
+        plt.tight_layout()
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -141,7 +161,7 @@ if __name__ == "__main__":
     file_path = "data/exercise_data/"
     label_path = "data/Labels.json"
     generator = ImageGenerator(
-        file_path, label_path, 10, [16, 16, 3], rotation=True, mirroring=True, shuffle=True
+        file_path, label_path, 20, [16, 16, 3], rotation=True, mirroring=True, shuffle=True
     )
     generator.next()
     generator.show()
