@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
 import unittest
-from src_to_implement.NumpyTests import *
+import NumpyTests
 from numpy import ndarray
 from dataclasses import dataclass
 import os
