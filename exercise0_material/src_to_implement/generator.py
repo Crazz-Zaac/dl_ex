@@ -158,8 +158,8 @@ class ImageGenerator:
 if __name__ == "__main__":
     # In this main function you can specify the paths to the image and label files
     # and create a generator object. Subsequently you can call next to visualize the image batch.
-    file_path = "data/exercise_data/"
-    label_path = "data/Labels.json"
+    file_path = "./exercise_data/"
+    label_path = "Labels.json"
     generator = ImageGenerator(
         file_path, label_path, 20, [16, 16, 3], rotation=True, mirroring=True, shuffle=True
     )

@@ -7,7 +7,7 @@ if __name__ == "__main__":
     # checker_board.draw()
     # checker_board.show()
     
-    generator = ImageGenerator("data/exercise_data/", "data/Labels.json", 
+    generator = ImageGenerator("./exercise_data/", "Labels.json", 
                                5, [32,32, 3], True, True)
     generator.next()
     generator.show()
