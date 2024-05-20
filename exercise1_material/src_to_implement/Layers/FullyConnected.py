@@ -14,9 +14,7 @@ class FullyConnected(BaseLayer):
         
     
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
-        batch_size = input_tensor.shape[0]
-        self.input_tensor = np.random.randn(batch_size, self.input_size)
-        self.output_tensor = np.dot(input_tensor, self.weights)
+        self.output_tensor = np.dot(input_tensor, self.weights) + self.bias
         return self.output_tensor
     
     # setter and getter property optimizer
@@ -41,3 +39,8 @@ class FullyConnected(BaseLayer):
         return cache
     
     
+    def calculate_update(self, weight_tensor: np.ndarray, gradient_tensor: np.ndarray) -> np.ndarray:
+        # do not perform an update if the optimizer is not set
+        if self.optimizer is None:
+            return gradient_tensor
+        return self.optimizer.calculate_update(weight_tensor, gradient_tensor)
