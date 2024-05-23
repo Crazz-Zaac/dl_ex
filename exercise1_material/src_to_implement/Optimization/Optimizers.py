@@ -1,7 +1,4 @@
 import numpy as np
-from src_to_implement.Optimization.Optimizer import Optimizer
-
-
 
 # Basic optimizer that performs a single step of gradient descent
 # on the given weight tensor.
