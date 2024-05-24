@@ -1,16 +1,17 @@
 import numpy as np
+from Layers.Base import BaseLayer
 
 
-class ReLU:
+class ReLU(BaseLayer):
     """
     Provides the methods forward and backward for a ReLU activation function.
     """
     
     
     def __init__(self):
-        self.output_tensor = None
+        super().__init__()
     
-    def forward(self, input_tensor):
+    def forward(self, input_tensor:np.ndarray) -> np.ndarray:
         """
         Computes the forward pass for a rectified linear unit (ReLU) activation function.
         
@@ -22,10 +23,11 @@ class ReLU:
             np.ndarray
                 The output tensor after applying the ReLU activation function.
         """
-        self.input_tensor = input_tensor
-        return np.maximum(input_tensor, 0)
+        input_tensor[input_tensor < 0] = 0 
+        self.output_tensor = input_tensor
+        return input_tensor
     
-    def backward(self, error_tensor):
+    def backward(self, error_tensor:np.ndarray) -> np.ndarray:
         """
         Computes the backward pass for a rectified linear unit (ReLU) activation function.
         
@@ -37,5 +39,6 @@ class ReLU:
             np.ndarray
                 The error tensor after applying the backward pass.
         """
-        return error_tensor * (self.input_tensor > 0)
+        error_tensor[self.output_tensor <= 0] = 0
+        return error_tensor
             
