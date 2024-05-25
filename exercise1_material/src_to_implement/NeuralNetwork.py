@@ -4,8 +4,19 @@ from copy import deepcopy
 
 class NeuralNetwork:
     """
-    defines the whole neural network architecture containing all its layers
-    from input to output layer
+    It defines the neural network class which is used to train and test the network.
+    
+    Attributes:
+        optimizer: np.ndarray
+            optimizer to be used for the network
+        loss: list
+            list to store the loss after each iteration
+        layers: list
+            list to store the layers of the network
+        data_layer: object
+            data layer object
+        loss_layer: object
+            loss layer object   
     """
 
     def __init__(self, optimizer: np.ndarray) -> None:
@@ -17,13 +28,17 @@ class NeuralNetwork:
 
     def forward(self) -> np.ndarray:
         """
-        forward pass through the network
+        It calculates the forward pass through the network 
+        and calculates the loss using the loss layer.
+                
         Args:
             input_tensor: np.ndarray
                 input tensor for the forward pass
+                Shape: (batch_size, input_size)
         Returns:
             np.ndarray
                 output tensor after applying the forward pass
+                shape: (batch_size, output_size)
         """
         input_tensor, self.label_tensor = self.data_layer.next()
         for layer in self.layers:
@@ -47,6 +62,7 @@ class NeuralNetwork:
         Args:
             layer: object
                 layer to be appended
+                shape: (batch_size, output_size)
         """
         # if the layer is trainable then it makes a deep copy of the optimizer
         # and assigns it to the layer
