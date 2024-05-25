@@ -4,6 +4,29 @@ from Optimization.Optimizers import *
 
 
 class FullyConnected(BaseLayer):
+    """
+    This class implements the fully connected layer.
+    It inherits from the BaseLayer class and implements the forward and backward pass.
+
+    Attributes:
+        input_size: int
+            input size for the layer
+
+        output_size: int
+            output size for the layer
+
+        weights: np.ndarray
+            weights for the layer
+            shape: (input_size + 1, output_size)
+                The +1 is for the bias term
+
+        optimizer: object
+            optimizer to be used for the layer
+
+        gradient_tensor: np.ndarray
+            gradient tensor with respect to the weights
+
+    """
 
     def __init__(self, input_size: int, output_size: int) -> None:
         super().__init__()
@@ -24,23 +47,51 @@ class FullyConnected(BaseLayer):
         self._optimizer = optimizer
 
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
+        """
+        It performs the forward pass through the fully connected layer.
+        This method accepts an input tensor, adds a bias term to the input tensor,
+        and computes the dot product (matrix multiplication) of the input tensor and the weights.
+
+        Args:
+            input_tensor: np.ndarray
+                input tensor for the forward pass
+
+        Returns:
+            np.ndarray
+                output tensor after applying the forward pass
+        """
+
         # print(f'input shape: {input_tensor.shape} weights shape: {self.weights.shape}')
         # print(np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))]).shape)
         input_tensor = np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))])
         self.input = input_tensor
-        self.output_tensor = np.dot(input_tensor, self.weights) 
+        self.output_tensor = np.dot(input_tensor, self.weights)
         # print(self.output_tensor.shape)
-        
+
         return self.output_tensor
 
     def backward(self, error_tensor: np.ndarray) -> np.ndarray:
-        # computing the gradient tensor with respect to the weights
+        """
+        It performs the backward pass through the fully connected layer.
+        This method accepts an error tensor, computes the error tensor with respect to the input tensor,
+        updates the weights using the optimizer, and computes the gradient tensor with respect to the weights.
+
+        Args:
+            error_tensor: np.ndarray
+                error tensor for the backward pass
+                shape:
+
+        Returns:
+            np.ndarray
+                error tensor after applying the backward pass
+        """
+
+        print(f"Beginning Error tensor shape: {error_tensor.shape}")
+        # computing the error tensor with respect to the input tensor
         self.error_tensor = np.dot(error_tensor, self.weights.T)
-        
+
         # computing the gradient tensor with respect to the input tensor
         self._gradient_tensor = np.dot(np.atleast_2d(self.input).T, error_tensor)
-
-        # print(f'gradient_tensor shape: {self.gradient_tensor.shape} error_tensor shape: {error_tensor.shape}')
 
         if self.optimizer is not None:
             # update weights using gradient with respect to weights
@@ -48,10 +99,13 @@ class FullyConnected(BaseLayer):
             self.weights = self.optimizer.calculate_update(
                 self.weights, self._gradient_tensor
             )
-
+        print(f"Error tensor shape: {self.error_tensor.shape}")
+        print(f"Final error_tensor shape: {self.error_tensor[:, :-1].shape}")
         return self.error_tensor[:, :-1]
 
     @property
     def gradient_weights(self) -> np.ndarray:
-        # do not perform an update if the optimizer is not set
+        """
+        This method returns the gradient tensor with respect to the weights.
+        """
         return self._gradient_tensor
