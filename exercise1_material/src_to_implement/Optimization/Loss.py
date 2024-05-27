@@ -5,7 +5,17 @@ class CrossEntropyLoss:
     """
     Used to calculate the cross entropy loss between the predicted and true labels.
     Typically in conjunction with Softmax or sigmoid activation function
+    
+    Attributes:
+        epsilon: np.float64
+            A small value to avoid division by zero
+        prediction_tensor: np.ndarray
+            The input tensor for the forward pass
+        entropy_loss: np.float64
+            The output tensor after applying the cross entropy loss
+        
     """
+    
 
     def __init__(self):
         self.epsilon = np.finfo(float).eps
@@ -47,6 +57,10 @@ class CrossEntropyLoss:
     def backward(self, label_tensor: np.ndarray) -> np.ndarray:
         """
         Computes the backward pass for cross entropy loss.
+        
+        Args:
+            label_tensor: np.ndarray
+                The label tensor for the backward pass.
 
         Returns:
             np.ndarray

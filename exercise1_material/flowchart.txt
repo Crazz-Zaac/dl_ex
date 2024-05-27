@@ -1,0 +1,57 @@
+op2=>operation: import numpy as np
+op4=>operation: from Layers import ReLU, SoftMax
+op6=>operation: from Layers.FullyConnected import FullyConnected
+op8=>operation: from NeuralNetwork import NeuralNetwork
+op10=>operation: from Optimization.Optimizers import Sgd
+op12=>operation: from Loss import CrossEntropyLoss
+op14=>operation: class DataGenerator():
+
+    def __init__(self, rows, cols, batch_size, output_size):
+        self.rows = rows
+        self.cols = cols
+        self.batch_size = batch_size
+        self.X = np.random.randn(rows, cols)
+        self.y = np.random.randn(rows, output_size)
+
+    def next(self):
+        idx = np.random.choice(self.rows, self.batch_size)
+        return (self.X[idx], self.y[idx])
+op16=>operation: input_size = 5
+op18=>operation: output_size = 3
+op20=>operation: batch_size = 4
+cond23=>condition: if (__name__ == '__main__')
+op27=>operation: optimizer = Sgd(learning_rate=0.01)
+op29=>operation: nn = NeuralNetwork(optimizer)
+op31=>operation: nn.data_layer = DataGenerator(100, 3, 4, 2)
+op33=>operation: nn.loss_layer = CrossEntropyLoss()
+op35=>operation: fc_layer = FullyConnected(3, 4)
+sub37=>subroutine: nn.append_layer(fc_layer)
+sub39=>subroutine: nn.append_layer(FullyConnected(4, 2))
+sub41=>subroutine: nn.train(10)
+sub43=>subroutine: print('Input tensor shape:', input_tensor.shape)
+sub45=>subroutine: print('Label tensor shape:', label_tensor.shape)
+sub47=>subroutine: print('Output tensor shape:', output_tensor.shape)
+sub49=>subroutine: print('Gradient tensor shape:', gradient_tensor.shape)
+
+op2->op4
+op4->op6
+op6->op8
+op8->op10
+op10->op12
+op12->op14
+op14->op16
+op16->op18
+op18->op20
+op20->cond23
+cond23(yes)->op27
+op27->op29
+op29->op31
+op31->op33
+op33->op35
+op35->sub37
+sub37->sub39
+sub39->sub41
+sub41->sub43
+sub43->sub45
+sub45->sub47
+sub47->sub49

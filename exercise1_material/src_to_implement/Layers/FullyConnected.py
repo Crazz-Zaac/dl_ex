@@ -17,14 +17,14 @@ class FullyConnected(BaseLayer):
 
         weights: np.ndarray
             weights for the layer
-            shape: (input_size + 1, output_size)
-                The +1 is for the bias term
+            shape: (input_size + 1, output_size) - The +1 is for the bias term
 
         optimizer: object
-            optimizer to be used for the layer
+            It is used to update the weights of the layer
+            Formula: weights = weights - learning_rate * gradient
 
         gradient_tensor: np.ndarray
-            gradient tensor with respect to the weights
+            It stores the gradient tensor with respect to the weights
 
     """
 
@@ -54,7 +54,8 @@ class FullyConnected(BaseLayer):
 
         Args:
             input_tensor: np.ndarray
-                input tensor for the forward pass
+                It is the input tensor for the forward pass
+                
 
         Returns:
             np.ndarray

@@ -2,9 +2,11 @@ import numpy as np
 # from NeuralNetworkTests import TestFullyConnected1, TestReLU, TestSoftMax
 from Layers import ReLU, SoftMax
 from Layers.FullyConnected import FullyConnected
+from Layers.ReLU import ReLU
+from Layers.SoftMax import SoftMax
 from NeuralNetwork import NeuralNetwork
 from Optimization.Optimizers import Sgd
-from Loss import CrossEntropyLoss
+from Optimization.Loss import CrossEntropyLoss
 
 
 class DataGenerator:
@@ -50,19 +52,25 @@ if __name__ == "__main__":
     nn = NeuralNetwork(optimizer)
     nn.data_layer = DataGenerator(100, 3, 4, 2)
     nn.loss_layer = CrossEntropyLoss()
+    nn.append_layer(FullyConnected(3, 4))
+    nn.append_layer(ReLU())
+    nn.append_layer(FullyConnected(4, 2))
+    nn.append_layer(SoftMax())
+    
+    nn.train(10)
     
     # Create an instance of FullyConnected layer and Sgd optimizer
-    fc_layer = FullyConnected(3, 4)
-    nn.append_layer(fc_layer)
-    nn.append_layer(FullyConnected(4, 2))   
-    nn.train(10)
+    # fc_layer = FullyConnected(3, 4)
+    # nn.append_layer(fc_layer)
+    # nn.append_layer(FullyConnected(4, 2))   
+    # nn.train(10)
     
     
    
 
     # Print the shapes of generated tensors for verification
-    print("Input tensor shape:", input_tensor.shape)
-    print("Label tensor shape:", label_tensor.shape)
-    print("Output tensor shape:", output_tensor.shape)
-    print("Gradient tensor shape:", gradient_tensor.shape)
+    # print("Input tensor shape:", input_tensor.shape)
+    # print("Label tensor shape:", label_tensor.shape)
+    # print("Output tensor shape:", output_tensor.shape)
+    # print("Gradient tensor shape:", gradient_tensor.shape)
    

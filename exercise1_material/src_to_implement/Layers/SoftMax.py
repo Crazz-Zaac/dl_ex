@@ -26,7 +26,9 @@ class SoftMax(BaseLayer):
         self.input_tensor = (
             input_tensor - input_tensor.max(axis=1, keepdims=True)
         )
+        # 
         exp_input_tensor = np.exp(self.input_tensor)
+        
         self.output_tensor = exp_input_tensor / exp_input_tensor.sum(
             axis=1, keepdims=True
         )
