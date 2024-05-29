@@ -55,7 +55,6 @@ class FullyConnected(BaseLayer):
         Args:
             input_tensor: np.ndarray
                 It is the input tensor for the forward pass
-                
 
         Returns:
             np.ndarray
@@ -101,7 +100,7 @@ class FullyConnected(BaseLayer):
                 self.weights, self._gradient_tensor
             )
         print(f"Error tensor shape: {self.error_tensor.shape}")
-        print(f"Final error_tensor shape: {self.error_tensor[:, :-1].shape}")
+        print(f"Final error_tensor shape: {self.error_tensor[:, :-1].shape}\n")
         return self.error_tensor[:, :-1]
 
     @property
