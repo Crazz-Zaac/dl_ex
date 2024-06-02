@@ -55,15 +55,21 @@ class FullyConnected(BaseLayer):
         Args:
             input_tensor: np.ndarray
                 It is the input tensor for the forward pass
+            size: (N x input_size)
 
         Returns:
             np.ndarray
                 output tensor after applying the forward pass
+            shape: (N x output_size)
         """
 
-        # print(f'input shape: {input_tensor.shape} weights shape: {self.weights.shape}')
-        # print(np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))]).shape)
+        print(f'input shape: {input_tensor.shape} weights shape: {self.weights.shape}')
+        print(np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))]).shape)
+        
+        # augmenting the input tensor with bias term
         input_tensor = np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))])
+        
+        # computing the dot product of the input tensor and the weights
         self.input = input_tensor
         self.output_tensor = np.dot(input_tensor, self.weights)
         # print(self.output_tensor.shape)
@@ -83,7 +89,7 @@ class FullyConnected(BaseLayer):
 
         Returns:
             np.ndarray
-                error tensor after applying the backward pass
+                error tensor after applying the backward pass excluding the bias term
         """
 
         print(f"Beginning Error tensor shape: {error_tensor.shape}")
@@ -106,6 +112,10 @@ class FullyConnected(BaseLayer):
     @property
     def gradient_weights(self) -> np.ndarray:
         """
-        This method returns the gradient tensor with respect to the weights.
+        This method returns the value of _gradient_tensor like a property without the
+        need to call the method explicitly.
+        Returns:
+            np.ndarray
+                gradient tensor with respect to the weights
         """
         return self._gradient_tensor
