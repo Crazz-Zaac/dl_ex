@@ -59,10 +59,6 @@ class NeuralNetwork:
     def append_layer(self, layer) -> None:
         """
         append the layer to the list of layers in the network
-        Args:
-            layer: object
-                layer to be appended
-                shape: (batch_size, output_size)
         """
         # if the layer is trainable then it makes a deep copy of the optimizer
         # and assigns it to the layer

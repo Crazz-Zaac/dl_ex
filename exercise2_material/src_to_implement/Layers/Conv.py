@@ -16,4 +16,10 @@ class Conv(BaseLayer):
         self.bias = None
     
     
-    
+    def initialize(self, input_shape: tuple) -> None:
+        self.input_shape = input_shape
+        self.weights = np.random.randn(
+            self.num_kernels, self.convolution_shape[0], self.convolution_shape[1]
+        )
+        self.bias = np.random.randn(self.num_kernels)
+        self.output_shape = self.compute_output_shape()

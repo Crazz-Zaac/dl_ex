@@ -37,11 +37,14 @@ class FullyConnected(BaseLayer):
         self._optimizer = None
         self.gradient_tensor = None
 
-    # setter and getter property optimizer
+    # this method/property returns the value of _optimizer 
+    # like a property when called on an instance of the class FullyConnected
     @property
     def optimizer(self):
         return self._optimizer
 
+    # this method/property sets the value of _optimizer
+    # like a property when called on an instance of the class FullyConnected
     @optimizer.setter
     def optimizer(self, optimizer):
         self._optimizer = optimizer
@@ -66,7 +69,8 @@ class FullyConnected(BaseLayer):
         print(f'input shape: {input_tensor.shape} weights shape: {self.weights.shape}')
         print(np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))]).shape)
         
-        # augmenting the input tensor with bias term
+        # augmenting the input tensor such that it includes the bias term 
+        # (a column of ones) at the end of the input tensor
         input_tensor = np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))])
         
         # computing the dot product of the input tensor and the weights
@@ -93,7 +97,7 @@ class FullyConnected(BaseLayer):
         """
 
         print(f"Beginning Error tensor shape: {error_tensor.shape}")
-        # computing the error tensor with respect to the input tensor
+        # computing the error tensor with respect to the 
         self.error_tensor = np.dot(error_tensor, self.weights.T)
 
         # computing the gradient tensor with respect to the input tensor
@@ -107,6 +111,7 @@ class FullyConnected(BaseLayer):
             )
         print(f"Error tensor shape: {self.error_tensor.shape}")
         print(f"Final error_tensor shape: {self.error_tensor[:, :-1].shape}\n")
+        
         return self.error_tensor[:, :-1]
 
     @property

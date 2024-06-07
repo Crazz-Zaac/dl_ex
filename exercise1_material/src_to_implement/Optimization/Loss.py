@@ -42,9 +42,10 @@ class CrossEntropyLoss:
         
         loss_ = self.prediction_tensor + self.epsilon
 
-        # get the true class indices for each sample in the batch
+
+        # get the indices of the maximum values within each row of the label tensor        
         true_class_indices = np.argmax(label_tensor, axis=1)
-        # get the predicted probabilities for the true class for each sample in the batch
+        # gets the probabilities of the classes from the loss_ array using the true class indices
         true_class_probs = loss_[
             np.arange(label_tensor.shape[0]), true_class_indices
         ]
