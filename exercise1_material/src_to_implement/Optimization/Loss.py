@@ -37,7 +37,7 @@ class CrossEntropyLoss:
                 The output tensor after applying the cross entropy loss.
         """
         
-        # to avoid division by zero
+        # to avoid division by zero when taking the log
         self.prediction_tensor = prediction_tensor 
         
         loss_ = self.prediction_tensor + self.epsilon
@@ -67,6 +67,7 @@ class CrossEntropyLoss:
             np.ndarray
                 The error tensor after applying the backward pass.
         """
+        # for numerical stability, add a small value to the prediction tensor
         loss_ = self.prediction_tensor + self.epsilon
         
         error_tensor = -label_tensor / loss_

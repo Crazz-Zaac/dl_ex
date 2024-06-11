@@ -4,6 +4,30 @@ from Layers.Base import BaseLayer
 
 
 class Conv(BaseLayer):
+    """
+    Performs a convolution operation on the input tensor.
+    
+    Attributes:
+        stride_shape: Union[tuple, int]
+            The stride shape for the convolution operation.
+        convolution_shape: tuple or int
+            The shape of the convolution operation is [c, m, n] for 2D convolution and [c, m] for 1D convolution.
+            c = number of input channels, m = height of the kernel, n = width of the kernel.
+        num_kernels: int
+            The number of kernels to be used in the convolution operation.
+        weights: np.ndarray
+            The weights for the convolution operation.
+        bias: np.ndarray
+            The bias for the convolution operation.
+        _gradient_weights: np.ndarray
+            The gradient of the weights for the convolution operation.
+        _bias: np.ndarray
+            The gradient of the bias for the convolution operation.
+    
+    Methods:
+    
+    """
+    
 
     def __init__(
         self,
@@ -13,15 +37,18 @@ class Conv(BaseLayer):
     ) -> None:
         super().__init__()
         self.trainable = True
-        self.stride_shape = stride_shape
+        # Check if stride_shape is an integer or tuple
+        self.stride_shape = stride_shape if isinstance(stride_shape, tuple) else (stride_shape, stride_shape)
         self.convolution_shape = convolution_shape
         self.num_kernels = num_kernels # also called num_filters
         
         # Initialize weights for 1D and 2D convolution
         if len(convolution_shape) == 2:
+            self.is1D = True
             self.weights = np.random.randn(
                 num_kernels, convolution_shape[0], convolution_shape[1])
         if len(convolution_shape) == 3:
+            self.is2D = True
             self.weights = np.random.randn(
                 num_kernels, convolution_shape[0], convolution_shape[1], convolution_shape[2])
             
@@ -51,12 +78,8 @@ class Conv(BaseLayer):
                 The shape of the output tensor.
         """
         # For 1D: input_shape = batch_size(b), channels(c), spatial_dim(y)
-        if len(input_shape) == 3:
-            output_shape = (
-                input_shape[0],
-                self.num_kernels,
-                (input_shape[2] - self.convolution_shape[0]) // self.stride_shape + 1,
-            )
+        if is1D:
+            output_shape = 
         
         return output_shape
     
