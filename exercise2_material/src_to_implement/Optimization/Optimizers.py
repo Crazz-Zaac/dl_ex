@@ -46,6 +46,19 @@ class SgdWithMomentum:
     def calculate_update(
         self, weight_tensor: np.ndarray, gradient_tensor: np.ndarray
     ) -> np.ndarray:
+        '''
+        It calculates the updated weight tensor using the formula:
+        weight_tensor + velocity
+        where velocity is calculated as:
+        momentum * velocity - learning_rate * gradient_tensor
+        
+        Args:
+            weight_tensor: The weight tensor to update.
+            gradient_tensor: The gradient tensor to use for the update. 
+            
+        Returns:
+            The updated weight tensor.
+        '''
         self.velocity = (
             self.momentum * self.velocity - self.learning_rate * gradient_tensor
         )
@@ -58,18 +71,11 @@ class Adam:
 
     Args:
         learning_rate: The learning rate to use.
-        mu: The mu factor.
-        rho: The rho factor.
-        epsilon: The epsilon factor.
-        weight_tensor: The weight tensor to update.
-        gradient_tensor: The gradient tensor to use for the update.
-        m: The first moment tensor to use for the update.
-        v: The second moment tensor to use for the update.
-        mu_t: The mu factor to the power of t.
-        rho_t: The rho factor to the power of t.
-
-    Returns:
-        The updated weight tensor.
+        mu: The momentum factor.
+        rho: The decay factor.
+        r: The running average of the squared gradient.
+        v: The running average of the gradient.
+        k: The current iteration.      
     """
 
     def __init__(self, learning_rate: float, mu: float, rho: float) -> None:

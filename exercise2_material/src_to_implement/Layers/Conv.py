@@ -6,46 +6,48 @@ from copy import deepcopy as copy
 
 
 class Conv(BaseLayer):
-    '''
-    This class implements the convolutional layer. 
+    """
+    This class implements the convolutional layer.
     It inherits from the BaseLayer class and implements the forward and backward pass.
-    
+
     Attributes:
         stride_shape: tuple or int
             The stride shape for the convolution operation.
             If it is an integer, it is converted to a tuple.
-            
+
         convolution_shape: list
             The shape of the convolution operation.
             For 1D convolution, it is [channel, m].
             For 2D convolution, it is [channel, m, n].
-            
+
         num_kernels: int
             The number of kernels for the convolution operation.
-            
+
         weights: np.ndarray
             The weights for the convolution operation.
             Shape: (num_kernels, channel, m, n) for 2D convolution
                      (num_kernels, channel, m) for 1D convolution
-                     
-        bias: np.ndarray    
+
+        bias: np.ndarray
             The bias for the convolution operation.
-            Shape: (num_kernels)    
-            
+            Shape: (num_kernels)
+
         gradient_weights: np.ndarray
             The gradient tensor with respect to the weights.
-            
+
         gradient_bias: np.ndarray
             The gradient tensor with respect to the bias.
-            
+
         optimizer: object
             The optimizer object to update the weights.
-            
+
         bias_optimizer: object
             The optimizer object to update the bias.
-    '''
-    
-    def __init__(self, stride_shape: [tuple, int], convolution_shape: list, num_kernels: int):
+    """
+
+    def __init__(
+        self, stride_shape: [tuple, int], convolution_shape: list, num_kernels: int
+    ):
         super().__init__()
         self.trainable = True
         self.stride_shape = (
@@ -75,17 +77,17 @@ class Conv(BaseLayer):
         self.conv_dimension = 2 if len(convolution_shape) == 3 else 1
 
     def initialize(self, weights_initializer: object, bias_initializer: object) -> None:
-        '''
+        """
         This method initializes the weights and bias of the convolutional layer.
-        
+
         Args:
             weights_initializer: object
                 The initializer object for the weights.
-                
+
             bias_initializer: object
-                The initializer object for the bias.        
-        '''
-        
+                The initializer object for the bias.
+        """
+
         fa_in = 1
         for i in self.convolution_shape:
             fa_in *= i
@@ -100,28 +102,24 @@ class Conv(BaseLayer):
         self._bias_optm = copy(self.optimizer)
 
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
-        '''
+        """
         This method performs the forward pass through the convolutional layer.
         It accepts an input tensor, performs the convolution operation on the input tensor
         with the weights and bias, and returns the output tensor.
-        
+
         Args:
             input_tensor: np.ndarray
                 The input tensor for the forward pass.
                 Size: (batch_size, channels, height, width) for 2D convolution
                         (batch_size, channels, length) for 1D convolution
-                        
-        Returns:    
+
+        Returns:
             np.ndarray
                 The output tensor after applying the forward pass.
                 Size: (batch_size, num_kernels, height, width) for 2D convolution
                         (batch_size, num_kernels, length) for 1D convolution
-                        
-        '''
-        
-        # if correlation is used in forward, we can use convole in backward
-        # or vice versa
-        # input_tensor shape (b,c,x,y) or (b,c,x)
+
+        """
         self.inp_tensor = input_tensor
         ishape = input_tensor.shape
         self.inp_shape = ishape
@@ -132,9 +130,7 @@ class Conv(BaseLayer):
 
         stride_w, stride_h = self.stride_shape
 
-        # new shape of y = (y-ky + 2*p)/stride_w + 1; y input size, ky kernel size, p padding size, stride_w stride size
-        #  but we need o/p size same as i/p so p=(ky-1)/2 if stride_w==1
-        # else we need to derive
+        # padding to keep the output shape same as input shape
         pad = [(cw - 1) / 2]
         output_shape = [int((y - cw + 2 * pad[0]) / stride_w + 1)]
         if self.conv_dimension == 2:
@@ -167,17 +163,17 @@ class Conv(BaseLayer):
         return result
 
     def update_parameters(self, error_tensor: np.ndarray) -> None:
-        '''
+        """
         It updates the weights and bias of the layer.
-        
-        Args:  
+
+        Args:
             error_tensor: np.ndarray
                 The error tensor of the current layer.
-                
+
         Returns:
             None
-        '''
-        
+        """
+
         # compute gradients of weights and bias
         berror = error_tensor.sum(axis=0)
         # sum over all batches
@@ -203,9 +199,12 @@ class Conv(BaseLayer):
 
                     if self.conv_dimension == 2:
                         error = np.zeros((y, x))
+                        # stride the error tensor to match the input tensor
                         error[::stride_w, ::stride_h] = error_tensor[
                             current_batch, current_kernel
                         ]
+                        # pad the input tensor for convolution operation with the error tensor
+                        # to calculate the gradient of weights
                         padded_input = np.pad(
                             self.inp_tensor[current_batch, ch],
                             [
@@ -213,8 +212,9 @@ class Conv(BaseLayer):
                                 (int(np.ceil(self.pad[1])), int(np.floor(self.pad[1]))),
                             ],
                         )
-                    else:
+                    else:  # 1D convolution
                         error = np.zeros(y)
+                        # stride the error tensor to match the input tensor
                         error[::stride_w] = error_tensor[current_batch, current_kernel]
                         padded_input = np.pad(
                             self.inp_tensor[current_batch, ch],
@@ -224,7 +224,7 @@ class Conv(BaseLayer):
                     self.gradient_weights[current_kernel, ch] += signal.correlate(
                         padded_input, error, mode="valid"
                     )
-
+        # update weights and bias using optimizer object
         if self.optimizer:
             self.weights = self._optm.calculate_update(self.weights, self._grad_wts)
             self.bias = self._bias_optm.calculate_update(self.bias, self._grad_bias)
@@ -244,38 +244,68 @@ class Conv(BaseLayer):
 
         gradient = np.zeros_like(self.inp_tensor)
         stride_w, stride_h = self.stride_shape
-
-        nweight = self.weights.copy()
-        nweight = (
-            np.transpose(nweight, axes=(1, 0, 2, 3))
+        # new_weight shape: (num_kernels, channel, m, n)
+        # new weight is the transposed version of the current weight tensor
+        # for 2d conv: (num_kernels, channel, m, n) -> (channel, num_kernels, m, n)
+        # for 1d conv: (num_kernels, channel, m) -> (channel, num_kernels, m)
+        new_weight = self.weights.copy()
+        new_weight = (
+            np.transpose(new_weight, axes=(1, 0, 2, 3))
             if self.conv_dimension == 2
-            else np.transpose(nweight, axes=(1, 0, 2))
+            else np.transpose(new_weight, axes=(1, 0, 2))
         )
-        ishape = self.inp_tensor.shape
-        y, x = ishape[-2:] if self.conv_dimension == 2 else (ishape[-1], None)
+        # get the shape of the input tensor after the convolution operation
+        # h_inpt and w_inpt are the height and width of the input tensor
+        new_input_shape = self.inp_tensor.shape
+        h_inpt, w_inpt = (
+            new_input_shape[-2:]
+            if self.conv_dimension == 2
+            else (new_input_shape[-1], None)
+        )
 
         batch_size = self.inp_tensor.shape[0]
-        wk, wc = nweight.shape[:2]
+        # w_kernel and w_channel are the number of kernels and channels of the weight tensor
+        w_kernel, w_channel = new_weight.shape[:2]
 
         for current_batch in range(batch_size):
-            for ck in range(wk):
+            for current_kernel in range(w_kernel):
                 grad = 0
-                for c in range(wc):
+                # iterate over the channels of the weight tensor
+                for current_channel in range(w_channel):
                     if self.conv_dimension == 2:
-                        err = np.zeros((y, x))
-                        err[::stride_w, ::stride_h] = error_tensor[current_batch, c]
+                        err = np.zeros((h_inpt, w_inpt))
+                        err[::stride_w, ::stride_h] = error_tensor[
+                            current_batch, current_channel
+                        ]
                     else:
-                        err = np.zeros(y)
-                        err[::stride_w] = error_tensor[current_batch, ck]
-                    # we used correlate on forward, use convolve now
+                        err = np.zeros(h_inpt)  # 1D convolution
+                        err[::stride_w] = error_tensor[current_batch, current_kernel]
+                    # convolution operation to calculate the gradient of the input tensor
+                    # between the error tensor and the transposed weight tensor
                     grad += signal.convolve(
-                        err, nweight[ck, c], mode="same", method="direct"
+                        err,
+                        new_weight[current_kernel, current_channel],
+                        mode="same",
+                        method="direct",
                     )
 
-                gradient[current_batch, ck] = grad
+                gradient[current_batch, current_kernel] = grad
         return gradient
 
     def backward(self, error_tensor: np.ndarray) -> np.ndarray:
+        """
+        This method performs the backward pass through the convolutional layer.
+        It accepts the error tensor of the next layer, calculates the error tensor of the current layer,
+        and updates the weights and bias.
+        
+        Args:
+            error_tensor: np.ndarray
+                The error tensor of the next layer.
+                
+        Returns:    
+            np.ndarray
+                The error tensor of the current layer.
+        """
         self.update_parameters(error_tensor)
         gradient = self.error_this_layer(error_tensor)
 
