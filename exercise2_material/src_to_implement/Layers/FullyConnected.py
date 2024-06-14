@@ -63,12 +63,14 @@ class FullyConnected(BaseLayer):
         weights_shape = (self.input_size, self.output_size)
         bias_shape = (1, self.output_size)
 
-        self.weights[:, :-1] = weights_initializer.initialize(
+        weights = weights_initializer.initialize(
             weights_shape, self.input_size, self.output_size
         )
-        self.weights[:, -1] = bias_initializer.initialize(
-            bias_shape, self.input_size, self.output_size
+        bias = bias_initializer.initialize(
+            bias_shape, 1, self.output_size
         )
+        # the vstack function adds the bias term to the weights matrix
+        self.weights = np.vstack([weights, bias])
 
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
         """
