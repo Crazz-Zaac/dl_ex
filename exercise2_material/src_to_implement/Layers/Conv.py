@@ -268,8 +268,8 @@ class Conv(BaseLayer):
         stride_w, stride_h = self.stride_shape
         # new_weight shape: (num_kernels, channel, m, n)
         # new weight is the transposed version of the current weight tensor
-        # for 2d conv: (num_kernels, channel, m, n) -> (channel, num_kernels, m, n)
-        # for 1d conv: (num_kernels, channel, m) -> (channel, num_kernels, m)
+        # if 2D, transpose the weight tensor in the two dimensions 
+        # if 1D, then in one dimension only
         new_weight = self.weights.copy()
         new_weight = (
             np.transpose(new_weight, axes=(1, 0, 2, 3))
@@ -315,6 +315,7 @@ class Conv(BaseLayer):
                     )
 
                 gradient[current_batch, current_kernel] = new_gradient
+                
         return gradient
 
     def backward(self, error_tensor: np.ndarray) -> np.ndarray:
