@@ -7,6 +7,7 @@ chartgenerate.py
 
 *.pdf
 *.zip
+*.gz
 
 DL_Solutions/
 DLEx/
