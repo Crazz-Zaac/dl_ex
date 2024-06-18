@@ -56,6 +56,7 @@ class Conv(BaseLayer):
             else stride_shape
         )
         # convolution shape: [channel, m] for 1D convolution, [channel, m, n] for 2D convolution
+        # dimensions of the filters (or kernels) for the convolution operation
         self.convolution_shape = convolution_shape
         self.num_kernels = num_kernels
         # weight shape: (num_kernels, channel, m, n) for 2D convolution
@@ -132,11 +133,12 @@ class Conv(BaseLayer):
         )
         # get the last two dimensions of the convolution shape for the kernel size
         # for 2d conv: (m, n), for 1d conv: (c, m)
-        kernel_width, kernel_height = self.convolution_shape[-2:]
+        kernel_width, kernel_height = self.convolution_shape[-2:] # dimensions of the filters (or kernels) for the convolution operation
 
         stride_w, stride_h = self.stride_shape
 
         # padding to keep the output shape same as input shape
+        # if 1d convolution, pad the width dimension
         pad = [(kernel_width - 1) / 2]
         output_shape = [int((y - kernel_width + 2 * pad[0]) / stride_w + 1)]
         # if 2d convolution, pad the height dimension
