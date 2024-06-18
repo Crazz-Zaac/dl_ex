@@ -90,11 +90,13 @@ class Conv(BaseLayer):
             bias_initializer: object
                 The initializer object for the bias.
         """
+        # convolution shape: [channel, m] for 1D convolution, [channel, m, n] for 2D convolution
+        # fa_in = channel * m for 1D convolution, fa_in = channel * m * n for 2D convolution
+        # fa_out = num_kernels * m for 1D convolution, fa_out = num_kernels * m * n for 2D convolution
+        
         fa_in = 1  # number of input features
         fa_out = self.num_kernels  # number of output features
-
-        # all the dimensions of the convolution shape are multiplied to get the number of input features
-        # except the first dimension of the convolution shape is multiplied to get the number of output features
+        
         for dim_val in self.convolution_shape:
             fa_in *= dim_val
         for dim_val in self.convolution_shape[1:]:
@@ -195,16 +197,15 @@ class Conv(BaseLayer):
         Returns:
             None
         """
-
+        # sum the error tensor over the batch size and the height dimension
         batch_error_h = error_tensor.sum(axis=0).sum(axis=1)
-
-        # sum the error tensor over the batch size and the output shape 
+ 
         # if 2D convolution, sum over the height and width dimensions else over the length dimension
         self._grad_bias = (
             batch_error_h.sum(axis=1) if self.conv_dimension == 2 else batch_error_h
         )
 
-        # compute gradients of weights for each kernel and channel of input
+        # get the shape of the input tensor 
         batch_size, channels, y, x = (
             self.inp_shape if self.conv_dimension == 2 else (*self.inp_shape, None)
         )
@@ -245,7 +246,7 @@ class Conv(BaseLayer):
                         )
 
                     self.gradient_weights[current_kernel, channel] += signal.correlate(
-                        padded_input, error, mode="valid"
+                        padded_input, error, mode="valid", method="direct"
                     )
 
         # update weights and bias using optimizer object
@@ -284,7 +285,7 @@ class Conv(BaseLayer):
         h_inpt, w_inpt = (
             new_input_shape[-2:]
             if self.conv_dimension == 2
-            else (new_input_shape[-1], None)
+            else (new_input_shape[-1], None)  # w_inpt is None for 1D convolution
         )
 
         batch_size = self.inp_tensor.shape[0]
