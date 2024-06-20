@@ -35,11 +35,12 @@ class Pooling(BaseLayer):
         # save the input tensor for the backward pass
         self.input_tensor = input_tensor
         batch_size, channels, input_height, input_width = input_tensor.shape
+        
         pooling_h, pooling_w = self.pooling_shape
         stride_h, stride_w = self.stride_shape
+        
         output_height = int(1 + (input_height - pooling_h) / stride_h)
         output_width = int(1 + (input_width - pooling_w) / stride_w)
-        # using valid padding for pooling layer
         output_tensor = np.zeros((batch_size, channels, output_height, output_width))
 
         for batch in range(batch_size):
@@ -76,8 +77,10 @@ class Pooling(BaseLayer):
         # initialize the gradient tensor with zeros of the same shape as the input tensor
         gradient = np.zeros_like(self.input_tensor)
         batch_size, channels, input_height, input_width = self.input_tensor.shape
+        
         pooling_h, pooling_w = self.pooling_shape
         stride_h, stride_w = self.stride_shape
+        
         output_height, output_width = self.output_tensor.shape[-2:]
 
         for batch in range(batch_size):
