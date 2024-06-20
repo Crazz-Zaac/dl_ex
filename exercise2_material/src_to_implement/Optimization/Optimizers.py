@@ -76,6 +76,9 @@ class Adam:
         r: The running average of the squared gradient.
         v: The running average of the gradient.
         k: The current iteration.      
+    
+    Returns:
+        The updated weight tensor.
     """
 
     def __init__(self, learning_rate: float, mu: float, rho: float) -> None:
