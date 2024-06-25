@@ -26,7 +26,7 @@ class L2_Regularizer:
         Returns:
             The L2 norm.
         """
-        return self.alpha * np.linalg.norm(weights)
+        return self.alpha * (weights ** 2).sum()
 
 class L1_Regularizer:
     """
@@ -44,7 +44,7 @@ class L1_Regularizer:
         Returns:
             The gradient of the L1 norm.
         """
-        return self.alpha * np.sign(weights)
+        return self.alpha * (weights > 0).astype(float) - self.alpha * (weights < 0).astype(float)
     
     def norm(self, weights: np.ndarray) -> np.ndarray:
         """
@@ -54,4 +54,4 @@ class L1_Regularizer:
         Returns:
             The L1 norm.
         """
-        return self.alpha * np.sum(np.abs(weights))
+        return self.alpha * np.abs(weights).sum()
