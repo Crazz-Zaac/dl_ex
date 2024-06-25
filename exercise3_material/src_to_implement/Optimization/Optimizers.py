@@ -12,6 +12,7 @@ class Optimizer:
 
     def __init__(self, learning_rate: float) -> None:
         self.learning_rate = learning_rate
+        self.regularizer = None
     
     def add_regularizer(self, regularizer) -> None:
         """
