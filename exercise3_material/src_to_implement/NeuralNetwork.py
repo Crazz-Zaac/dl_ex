@@ -1,6 +1,5 @@
 import numpy as np
 from copy import deepcopy
-from Optimization.Optimizers import *
 
 class NeuralNetwork:
     """
