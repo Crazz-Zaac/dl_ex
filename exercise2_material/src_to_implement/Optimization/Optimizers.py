@@ -101,9 +101,10 @@ class Adam:
         Returns:
             The updated weight tensor.
         """
-        self.v = self.mu * self.v + (1 - self.mu) * gradient_tensor
-        self.r = self.rho * self.r + (1 - self.rho) * (gradient_tensor**2)
+        self.v = self.mu * self.v + (1 - self.mu) * gradient_tensor # first moment estimate
+        self.r = self.rho * self.r + (1 - self.rho) * (gradient_tensor**2) # second raw moment estimate
 
+        # Bias correction for the first and second moment estimates
         v_hat = self.v / (1 - self.mu**self.k)
         r_hat = self.r / (1 - self.rho**self.k)
         self.k += 1
