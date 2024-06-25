@@ -5,8 +5,8 @@ class L2_Regularizer:
     L2 Regularization class to calculate the gradient of the L2 norm.
     """
 
-    def __init__(self, regularization_rate: float) -> None:
-        self.regularization_rate = regularization_rate
+    def __init__(self, alpha: float) -> None:
+        self.alpha = alpha
 
     def calculate_gradient(self, weights: np.ndarray) -> np.ndarray:
         """
@@ -16,7 +16,7 @@ class L2_Regularizer:
         Returns:
             The gradient of the L2 norm.
         """
-        return 2 * self.regularization_rate * weights
+        return 2 * self.alpha * weights
     
     def norm(self, weights: np.ndarray) -> np.ndarray:
         """
@@ -26,15 +26,15 @@ class L2_Regularizer:
         Returns:
             The L2 norm.
         """
-        return self.regularization_rate * np.linalg.norm(weights)
+        return self.alpha * np.linalg.norm(weights)
 
 class L1_Regularizer:
     """
     L1 Regularization class to calculate the gradient of the L1 norm.
     """
 
-    def __init__(self, regularization_rate: float) -> None:
-        self.regularization_rate = regularization_rate
+    def __init__(self, alpha: float) -> None:
+        self.alpha = alpha
 
     def calculate_gradient(self, weights: np.ndarray) -> np.ndarray:
         """
@@ -44,7 +44,7 @@ class L1_Regularizer:
         Returns:
             The gradient of the L1 norm.
         """
-        return self.regularization_rate * np.sign(weights)
+        return self.alpha * np.sign(weights)
     
     def norm(self, weights: np.ndarray) -> np.ndarray:
         """
@@ -54,4 +54,4 @@ class L1_Regularizer:
         Returns:
             The L1 norm.
         """
-        return self.regularization_rate * np.sum(np.abs(weights))
+        return self.alpha * np.sum(np.abs(weights))
