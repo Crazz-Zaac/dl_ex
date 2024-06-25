@@ -1,5 +1,5 @@
 import numpy as np
-
+from Optimization.Constraints import L2_Regularizer, L1_Regularizer
 
 #creating a base class for all the optimizers and defining the common methods
 class Optimizer:
@@ -35,7 +35,9 @@ class Optimizer:
         Returns:
             The updated weight tensor.
         """
-        raise NotImplementedError
+        if self.regularizer is not None:
+            gradient_tensor += self.regularizer.calculate_gradient(weight_tensor)
+        return weight_tensor
 
 
 # Basic optimizer that performs a single step of gradient descent
