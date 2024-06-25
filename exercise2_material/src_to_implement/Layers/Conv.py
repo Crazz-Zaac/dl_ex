@@ -61,7 +61,7 @@ class Conv(BaseLayer):
         self.num_kernels = num_kernels
         # weight shape: (num_kernels, channel, m, n) for 2D convolution
         # (num_kernels, channel, m) for 1D convolution
-        # bias shape: (num_kernels)
+        # bias shape: (num_kernels) because there is one bias term for each kernel
         self._weight_shape = [num_kernels, *convolution_shape]
         self._bias_shape = [num_kernels]
 
