@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-
+from Optimization.Optimizers import *
 
 class NeuralNetwork:
     """
@@ -29,6 +29,7 @@ class NeuralNetwork:
         self.layers = []
         self.data_layer = None
         self.loss_layer = None
+        self._phase = None
 
     def forward(self) -> np.ndarray:
         """
@@ -83,7 +84,7 @@ class NeuralNetwork:
             iterations: int
                 number of iterations to train the network
         """
-        self.testing_phase = True
+        self.phase = "training"
         for _ in range(iterations):
             loss_ = self.forward()
             self.backward()
@@ -99,27 +100,21 @@ class NeuralNetwork:
             np.ndarray
                 output tensor after testing the network
         """
-        self.testing_phase = True
+        self.phase = "testing"
         for layer in self.layers:
             input_tensor = layer.forward(input_tensor)
         return input_tensor
 
 
-@property
-def phase(self) -> str:
-    """
-    It returns the phase of the network
-    Returns:
-    str
-        phase of the network
-    """
-    return self.testing_phase
-@phase.setter
-def phase(self, phase: str) -> None:
-    """
-    It sets the phase of the network
-    Args:
-    phase: str
-        phase to be set
-    """
-    self.testing_phase = phase
+    @property 
+    def phase(self):
+        return self._phase
+    
+    @phase.setter
+    def phase(self, phase):
+        for layer in self.layers:
+            layer.phase = phase
+            
+
+
+
