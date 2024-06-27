@@ -1,4 +1,5 @@
 import numpy as np
+from Layers.Layer import *
 
 class TanH:
     """
@@ -7,7 +8,8 @@ class TanH:
     
     
     def __init__(self):
-        pass
+        super().__init__()
+        self.activation = None
     
     def forward(self, input_tensor:np.ndarray) -> np.ndarray:
         """
