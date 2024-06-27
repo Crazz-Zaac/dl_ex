@@ -1,4 +1,5 @@
 import numpy as np
+from Layers.Layer import *
 
 class Sigmoid:
     """
@@ -7,7 +8,8 @@ class Sigmoid:
     
     
     def __init__(self):
-        pass
+        super().__init__()
+        self.activation = None
     
     def forward(self, input_tensor:np.ndarray) -> np.ndarray:
         """
@@ -21,7 +23,7 @@ class Sigmoid:
             np.ndarray
                 The output tensor after applying the sigmoid activation function.
         """
-        self.activation = 1 / (1 + np.exp(-input_tensor))
+        self.activation = 1 / (1 + np.exp(- input_tensor))
         return self.activation
     
     def backward(self, error_tensor:np.ndarray) -> np.ndarray:
@@ -36,4 +38,4 @@ class Sigmoid:
             np.ndarray
                 The error tensor after applying the backward pass.
         """
-        return error_tensor * self.activation * (1 - self.activation)
+        return error_tensor * (self.activation * (1 - self.activation))
