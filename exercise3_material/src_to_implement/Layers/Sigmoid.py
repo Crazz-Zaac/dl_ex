@@ -1,7 +1,7 @@
 import numpy as np
-from Layers.Layer import *
+from Layers.Base import BaseLayer
 
-class Sigmoid:
+class Sigmoid(BaseLayer):
     """
     Provides the methods forward and backward for a Sigmoid activation function.
     """

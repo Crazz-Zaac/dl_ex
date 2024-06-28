@@ -1,7 +1,7 @@
 import numpy as np
-from Layers.Layer import *
+from Layers.Base import BaseLayer
 
-class TanH:
+class TanH(BaseLayer):
     """
     Provides the methods forward and backward for a TanH activation function.
     """
