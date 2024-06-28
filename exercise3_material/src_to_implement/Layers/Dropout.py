@@ -1,7 +1,7 @@
 import numpy as np
-from copy import deepcopy
+from Layers.Base import BaseLayer
 
-class Dropout:
+class Dropout(BaseLayer):
     """
     Dropout layer to be used in the neural network.
     
@@ -13,10 +13,12 @@ class Dropout:
     """
     
     def __init__(self, probability: float) -> None:
+        super().__init__()
+        
         self.probability = probability
         self.mask = None
 
-    def forward(self, input_tensor: np.ndarray, phase: str) -> np.ndarray:
+    def forward(self, input_tensor: np.ndarray) -> np.ndarray:
         """
         Forward pass for the dropout layer.
         
@@ -30,11 +32,13 @@ class Dropout:
             np.ndarray
                 The output tensor
         """
-        if phase == "train":
-            self.mask = np.random.binomial(1, 1 - self.probability, size=input_tensor.shape)
-            return input_tensor * self.mask
-        else:
-            return input_tensor # * (1 - self.probability)
+        if self.testing_phase :
+            return input_tensor 
+        
+        self.mask = np.random.rand(*input_tensor.shape) < self.probability
+        
+        return (input_tensor * self.mask) / self.probability
+        
     
     def backward(self, error_tensor: np.ndarray) -> np.ndarray:
         """
@@ -48,7 +52,7 @@ class Dropout:
             np.ndarray
                 The error tensor for the next layer
         """
-        return error_tensor * self.mask
+        return (error_tensor * self.mask) / (self.probability)
     
         
     
