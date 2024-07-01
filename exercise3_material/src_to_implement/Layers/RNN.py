@@ -31,7 +31,7 @@ class RNN(BaseLayer):
 
         self.hidden_fcl_input_tensor = []
         self.output_fcl_input_tensor = []
-        self.sigmoid_outpus = []
+        self.sigmoid_outputs = []
         self.tanh_outputs = []
 
         self.hidden_fcl_gradient_weights = []
@@ -104,10 +104,10 @@ class RNN(BaseLayer):
             sigmoid_out = self.sigmoid.forward(output_in)
             output_tensor[i] = sigmoid_out
             
-            self.hidden_fcl_input_tensor.append(self.hidden_fcl.input_tensor)
-            self.output_fcl_input_tensor.append(self.output_fcl.input_tensor)
-            self.sigmoid_outputs.append(self.sigmoid_out)
-            self.tanh_outputs.append(self.tanh_output)
+            self.hidden_fcl_input_tensor.append(self.hidden_fcl.input)
+            self.output_fcl_input_tensor.append(self.output_fcl.input)
+            self.sigmoid_outputs.append(self.sigmoid.activation)
+            self.tanh_outputs.append(self.tanh.activation)
             
         self.hidden_state = previous_hidden_state
         return output_tensor
@@ -122,16 +122,16 @@ class RNN(BaseLayer):
         gradient_wrt_inputs = np.zeros((batch_size, self.input_size))
         
         for step in reversed(range(batch_size)):
-            self.sigmoid.output = self.sigmoid_outputs[step]
+            self.sigmoid.activation = self.sigmoid_outputs[step]
             sigmoid_error = self.sigmoid.backward(error_tensor[step])
             
-            self.output_fcl.input_tensor = self.output_fcl_input_tensor[step]
+            self.output_fcl.input = self.output_fcl_input_tensor[step]
             output_fcl_error = self.output_fcl.backward(sigmoid_error)
             
-            self.tanh.output = self.tanh_outputs[step]
+            self.tanh.activation = self.tanh_outputs[step]
             tanh_error = self.tanh.backward(output_fcl_error + gradient_previous_hidden_state)
             
-            self.hidden_fcl.input_tensor = self.hidden_fcl_input_tensor[step]
+            self.hidden_fcl.input = self.hidden_fcl_input_tensor[step]
             hidden_fcl_error = self.hidden_fcl.backward(tanh_error)
             
             gradient_previous_hidden_state = hidden_fcl_error[:, :self.hidden_size]
