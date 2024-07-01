@@ -37,6 +37,7 @@ class FullyConnected(BaseLayer):
         self.weights = np.random.uniform(size=(input_size + 1, output_size))
         self._optimizer = None
         self.gradient_tensor = None
+        self.input = None
 
     # setter and getter property optimizer
     @property
