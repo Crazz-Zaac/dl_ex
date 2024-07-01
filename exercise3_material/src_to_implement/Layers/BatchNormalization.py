@@ -65,7 +65,6 @@ class BatchNormalization(BaseLayer):
         self.weights = np.ones(self.channels)
         self.bias = np.zeros(self.channels)
 
-
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
         self.input_tensor = input_tensor
 
@@ -159,10 +158,16 @@ class BatchNormalization(BaseLayer):
         return err_here
 
     def reformat(self, tensor: np.ndarray) -> np.ndarray:
+        
         if len(tensor.shape) == 4:
             batch, channels, height, width = tensor.shape
-            
-            
-            
+            reshaped_tensor = tensor.reshape((batch, channels, height * width))
+            transposed_tensor = reshaped_tensor.transpose((0, 2, 1))
+            output_tensor = transposed_tensor.reshape((batch * height * width, channels))
+        else:
+            batch, channels, height, width = self.input_tensor.shape
+            reshaped_tensor = tensor.reshape((batch, height * width, channels))
+            transposed_tensor = reshaped_tensor.transpose((0, 2, 1))
+            output_tensor = transposed_tensor.reshape((batch, channels, height, width))
 
-        return reshaped_tensor
+        return output_tensor
