@@ -92,6 +92,7 @@ class FullyConnected(BaseLayer):
         # print(np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))]).shape)
         input_tensor = np.hstack([input_tensor, np.ones((input_tensor.shape[0], 1))])
         self.input = input_tensor
+        # print(input_tensor, self.weights)
         self.output_tensor = np.dot(input_tensor, self.weights)
         # print(self.output_tensor.shape)
 
@@ -113,9 +114,9 @@ class FullyConnected(BaseLayer):
                 error tensor after applying the backward pass
         """
 
-        print(f"Beginning Error tensor shape: {error_tensor.shape}")
+        # print(f"Beginning Error tensor shape: {error_tensor.shape}")
         # computing the error tensor with respect to the input tensor
-        self.error_tensor = np.dot(error_tensor, self.weights.T)
+        self.error_tensor = np.dot(error_tensor, np.delete(self.weights, -1, 0).T)
 
         # computing the gradient tensor with respect to the input tensor
         self._gradient_tensor = np.dot(np.atleast_2d(self.input).T, error_tensor)
@@ -126,9 +127,9 @@ class FullyConnected(BaseLayer):
             self.weights = self.optimizer.calculate_update(
                 self.weights, self._gradient_tensor
             )
-        print(f"Error tensor shape: {self.error_tensor.shape}")
-        print(f"Final error_tensor shape: {self.error_tensor[:, :-1].shape}\n")
-        return self.error_tensor[:, :-1]
+        # print(f"Error tensor shape: {self.error_tensor.shape}")
+        # print(f"Final error_tensor shape: {self.error_tensor[:, :-1].shape}\n")
+        return self.error_tensor #[:, :-1]
 
     @property
     def gradient_weights(self) -> np.ndarray:
