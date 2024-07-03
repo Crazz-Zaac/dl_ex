@@ -45,9 +45,16 @@ class NeuralNetwork:
                 shape: (batch_size, output_size)
         """
         input_tensor, self.label_tensor = self.data_layer.next()
+        reg_loss=0
         for layer in self.layers:
             input_tensor = layer.forward(input_tensor)
-        self.prediction = self.loss_layer.forward(input_tensor, self.label_tensor)
+            try:
+                reg_loss+=self.optimizer.regularizer.norm(layer.weights)
+            except:
+                pass
+            layer.testing_phase = True
+        self.prediction = self.loss_layer.forward(input_tensor+reg_loss, 
+                                                  self.label_tensor)
         return self.prediction
 
     def backward(self) -> None:
@@ -83,7 +90,7 @@ class NeuralNetwork:
             iterations: int
                 number of iterations to train the network
         """
-        self.phase = "training"
+        # self.phase = "training"
         for _ in range(iterations):
             loss_ = self.forward()
             self.backward()
@@ -99,7 +106,7 @@ class NeuralNetwork:
             np.ndarray
                 output tensor after testing the network
         """
-        self.phase = "testing"
+        # self.phase = "testing"
         for layer in self.layers:
             input_tensor = layer.forward(input_tensor)
         return input_tensor
@@ -111,8 +118,7 @@ class NeuralNetwork:
     
     @phase.setter
     def phase(self, phase):
-        for layer in self.layers:
-            layer.phase = phase
+        self._phase = phase
             
 
 
