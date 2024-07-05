@@ -1,6 +1,7 @@
 import numpy as np
 from copy import deepcopy
 
+
 class NeuralNetwork:
     """
     It defines the neural network class which is used to train and test the network.
@@ -34,6 +35,11 @@ class NeuralNetwork:
         """
         It calculates the forward pass through the network
         and calculates the loss using the loss layer.
+        For each layer in the network:
+            - calculate the forward pass
+            - if the layer is trainable, calculate the regularization loss
+            - set the testing_phase to True
+            - calculate the loss using the loss layer
 
         Args:
             input_tensor: np.ndarray
@@ -45,21 +51,28 @@ class NeuralNetwork:
                 shape: (batch_size, output_size)
         """
         input_tensor, self.label_tensor = self.data_layer.next()
-        reg_loss=0
+        reg_loss = 0
         for layer in self.layers:
             input_tensor = layer.forward(input_tensor)
             try:
-                reg_loss+=self.optimizer.regularizer.norm(layer.weights)
+                reg_loss += self.optimizer.regularizer.norm(layer.weights)
             except:
                 pass
             layer.testing_phase = True
-        self.prediction = self.loss_layer.forward(input_tensor+reg_loss, 
-                                                  self.label_tensor)
+        self.prediction = self.loss_layer.forward(
+            input_tensor + reg_loss, self.label_tensor
+        )
         return self.prediction
 
     def backward(self) -> None:
         """
-        backward pass through the network
+        It calculates the backward pass through the network
+        and updates the weights of the layers.
+        For layer in reversed order:
+            - calculate the backward pass
+            - update the weights of the layer
+            - if the layer is trainable, update the weights using the optimizer
+
         """
         loss_ = self.loss_layer.backward(self.label_tensor)
 
@@ -90,7 +103,6 @@ class NeuralNetwork:
             iterations: int
                 number of iterations to train the network
         """
-        # self.phase = "training"
         for _ in range(iterations):
             loss_ = self.forward()
             self.backward()
@@ -98,7 +110,7 @@ class NeuralNetwork:
 
     def test(self, input_tensor: np.ndarray) -> np.ndarray:
         """
-        test the network on the input tensor
+        This function is used to test the network using the input tensor
         Args:
             input_tensor: np.ndarray
                 input tensor for the network
@@ -106,20 +118,17 @@ class NeuralNetwork:
             np.ndarray
                 output tensor after testing the network
         """
-        # self.phase = "testing"
         for layer in self.layers:
             input_tensor = layer.forward(input_tensor)
         return input_tensor
 
-
-    @property 
+    # getter and setter for the phase attribute
+    # the phase attribute is used to set the phase of the network
+    # whether it is training or testing
+    @property
     def phase(self):
         return self._phase
-    
+
     @phase.setter
     def phase(self, phase):
         self._phase = phase
-            
-
-
-
