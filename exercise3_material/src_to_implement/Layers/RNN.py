@@ -111,7 +111,13 @@ class RNN(BaseLayer):
     
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
         '''
-        This function calculates the forward pass of the RNN layer. 
+        This function calculates the forward pass of the RNN layer.
+        - Clear the intermediate values stored during the forward pass
+         
+        - Initialize the hidden state with zeros if memorize is set to False
+        - Get the batch_size from the input tensor
+        - Initialize the output tensor with zeros
+        
         For each batch_size:
         - combined_input = [previous_hidden_state, input_tensor]
         - hidden_fcl_input = W_h * combined_input + b_h
@@ -160,6 +166,11 @@ class RNN(BaseLayer):
     def backward(self, error_tensor: np.ndarray) -> np.ndarray:
         '''
         This function calculates the backward pass of the RNN layer.
+        - initialize the gradient weights of the hidden and output fully connected layers with zeros
+        - set the gradient_previous_hidden_state to zero
+        - get the batch_size from the error tensor
+        - initialize the gradient_wrt_inputs with zeros
+                
         For each batch_size (in reverse order):
         - Calculate the gradients of the loss L w.r.t the error tensor (y_t - y_hat_t)
         - Propagate back through the output fully connected layer and compute gradient w.r.t the hidden state (h_t)
