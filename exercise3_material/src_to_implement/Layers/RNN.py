@@ -6,7 +6,44 @@ from .Sigmoid import Sigmoid
 
 
 class RNN(BaseLayer):
-
+    '''
+    RNN layer implementation using the following formula:
+    h_t = tanh(W_h * [h_t-1, x_t] + b_h)
+    y_t = sigmoid(W_y * h_t + b_y)
+    where:
+    h_t is the hidden state at time t
+    x_t is the input at time t
+    y_t is the output at time t
+    W_h, W_y are the weights of the hidden and output layer respectively
+    b_h, b_y are the biases of the hidden and output layer respectively
+    
+    Attributes:
+    input_size: int - size of the input tensor
+    hidden_size: int - size of the hidden state
+    output_size: int - size of the output tensor
+    hidden_state: np.ndarray - hidden state of the RNN layer
+    memorize: bool - flag to memorize the hidden state across forward passes
+    optimizer: Optimizer - optimizer that defines the optimization algorithm to be used for updating the weights
+    regularization_loss: float - regularization loss
+    gradient_weights: np.ndarray - gradient weights of the hidden and output fully connected layers
+    tanh: TanH - tanh activation function
+    sigmoid: Sigmoid - sigmoid activation function
+    hidden_fcl: FullyConnected - fully connected layer for the hidden state
+    output_fcl: FullyConnected - fully connected layer for the output tensor
+    hidden_fcl_input_tensor: list - list to store the input tensor of the hidden fully connected layer
+    output_fcl_input_tensor: list - list to store the input tensor of the output fully connected layer
+    sigmoid_outputs: list - list to store the output of the sigmoid activation function
+    tanh_outputs: list - list to store the output of the tanh activation function
+    hidden_fcl_gradient_weights: list - list to store the gradient weights of the hidden fully connected layer
+    output_fcl_gradient_weights: list - list to store the gradient weights of the output fully connected layer
+    
+    Methods:
+    calculate_regularization_loss: Calculate the regularization loss for the hidden and output layer weights
+    initialize: Initialize the weights and biases of the hidden and output layer using the provided initializer
+    forward: Calculate the forward pass of the RNN layer
+    backward: Calculate the backward pass of the RNN layer    
+    '''
+    
     def __init__(self, input_size: int, hidden_size: int, output_size: int) -> None:
         super().__init__()
         self.trainable = True
@@ -41,12 +78,20 @@ class RNN(BaseLayer):
 
         self.hidden_fcl_gradient_weights = []
         self.output_fcl_gradient_weights = []
-        
-        
+       
 
+    def calculate_regularization_loss(self) -> float:
+        '''
+        Calculate the regularization loss for the hidden and output layer weights 
+        using the optimizer's regularizer
+        If regularizer is provided, the regularization loss is calculated as:
+            - regularization_loss = regularization_loss + norm(W_h) + norm(W_y)
+        else
+            - regularization_loss = 0        
+        Returns:
+        regularization_loss: float - regularization loss
         
-
-    def calculate_regularization_loss(self):
+        '''        
         if self.optimizer.regularizer:
             self.regularization_loss += self.optimizer.regularizer.norm(
                 self.hidden_fcl.weights
@@ -54,11 +99,32 @@ class RNN(BaseLayer):
 
         return self.regularization_loss
 
-    def initialize(self, weights_initializer, bias_initializer):
+    
+    def initialize(self, weights_initializer, bias_initializer) -> None:
+        '''
+        Initialize the weights and biases of the hidden and output layer using the 
+        provided initializer
+        '''
         self.hidden_fcl.initialize(weights_initializer, bias_initializer)
         self.output_fcl.initialize(weights_initializer, bias_initializer)
 
+    
     def forward(self, input_tensor: np.ndarray) -> np.ndarray:
+        '''
+        This function calculates the forward pass of the RNN layer. 
+        For each batch_size:
+        - combined_input = [previous_hidden_state, input_tensor]
+        - hidden_fcl_input = W_h * combined_input + b_h
+        - tanh_output = tanh(hidden_fcl_input)
+        - output_in = W_y * tanh_output + b_y
+        - sigmoid_out = sigmoid(output_in)
+        
+        Arguments:
+        input_tensor: np.ndarray - input tensor of shape (batch_size, input_size)
+        
+        Returns:
+        output_tensor: np.ndarray - output tensor of shape (batch_size, output_size)
+        '''
         self.sigmoid_outputs.clear()
         self.tanh_outputs.clear()
         self.hidden_fcl_input_tensor.clear()
@@ -92,6 +158,24 @@ class RNN(BaseLayer):
         return output_tensor
 
     def backward(self, error_tensor: np.ndarray) -> np.ndarray:
+        '''
+        This function calculates the backward pass of the RNN layer.
+        For each batch_size (in reverse order):
+        - Calculate the gradients of the loss L w.r.t the error tensor (y_t - y_hat_t)
+        - Propagate back through the output fully connected layer and compute gradient w.r.t the hidden state (h_t)
+        - Compute gradient of the loss w.r.t the hidden state (h_t) and the deravative of the tanh activation from next time step (h_t+1)
+        - Propagate back through the hidden fully connected layer and compute gradient w.r.t combined_input
+        - Accumulate the gradients of the hidden and output fully connected layers
+        - If an optimizer is provided, update the weights of the hidden and output fully connected layers
+                
+        Arguments:
+        error_tensor: np.ndarray - error tensor of shape (batch_size, output_size)
+        
+        Returns:
+        gradient_wrt_inputs: np.ndarray - gradient of the loss w.r.t the input tensor of shape (batch_size, input_size)
+         
+        
+        '''
         self.gradient_weights = np.zeros_like(self.hidden_fcl.weights)
         self.output_fcl_gradient_weights = np.zeros_like(self.output_fcl.weights)
 
@@ -134,7 +218,8 @@ class RNN(BaseLayer):
         return gradient_wrt_inputs
     
     
-
+    # setter and getter methods for the optimizer that defines the optimization algorithm
+    # to be used for updating the weights of the hidden and output fully connected layers
     @property
     def optimizer(self):
         return self._optimizer
@@ -142,9 +227,12 @@ class RNN(BaseLayer):
     @optimizer.setter
     def optimizer(self, optimizer):
         self._optimizer = optimizer
-        # self.hidden_fcl.optimizer = optimizer
-        # self.output_fcl.optimizer = optimizer
 
+    
+    # setter and getter methods for the memorize attribute that defines whether the hidden state
+    # should be memorized across forward passes
+    # if memorize is set to True, the hidden state from the previous forward pass is used as the initial hidden state
+    # else the hidden state is initialized with zeros
     @property
     def memorize(self):
         return self._memorize
@@ -153,6 +241,8 @@ class RNN(BaseLayer):
     def memorize(self, memorize):
         self._memorize = memorize
 
+    
+    # setter and getter methods for the weights of the hidden and output fully connected layers
     @property
     def weights(self):
         return self.hidden_fcl.weights
@@ -160,7 +250,11 @@ class RNN(BaseLayer):
     @weights.setter
     def weights(self, weights):
         self.hidden_fcl.weights = weights
-
+        
+    
+    # setter and getter methods for the gradient weights of the hidden and output fully connected layers
+    # that are used to update the weights of the hidden and output fully connected layers
+    # during the backward pass
     @property
     def gradient_weights(self):
         return self._gradient_weights
