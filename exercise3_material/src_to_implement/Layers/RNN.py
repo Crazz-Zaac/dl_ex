@@ -144,7 +144,7 @@ class RNN(BaseLayer):
 
         for i in range(batch_size):
             combined_input = np.concatenate(
-                (previous_hidden_state,input_tensor[i])
+                (previous_hidden_state, input_tensor[i])
             ).reshape(1, -1)
             hidden_fcl_input = self.hidden_fcl.forward(combined_input)
             tanh_output = self.tanh.forward(hidden_fcl_input)

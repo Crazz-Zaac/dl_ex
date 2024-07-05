@@ -11,6 +11,7 @@ class L2_Regularizer:
     def calculate_gradient(self, weights: np.ndarray) -> np.ndarray:
         """
         Calculate the gradient of the L2 norm.
+        Formula: alpha * weights
         Args:
             weights: The weight tensor to calculate the gradient for.
         Returns:
@@ -21,6 +22,7 @@ class L2_Regularizer:
     def norm(self, weights: np.ndarray) -> np.ndarray:
         """
         Calculate the L2 norm.
+        Formula: alpha * sum(weights^2)
         Args:
             weights: The weight tensor to calculate the norm for.
         Returns:
@@ -39,6 +41,7 @@ class L1_Regularizer:
     def calculate_gradient(self, weights: np.ndarray) -> np.ndarray:
         """
         Calculate the gradient of the L1 norm.
+        Formula: alpha * sign(weights)  
         Args:
             weights: The weight tensor to calculate the gradient for.
         Returns:
@@ -49,6 +52,7 @@ class L1_Regularizer:
     def norm(self, weights: np.ndarray) -> np.ndarray:
         """
         Calculate the L1 norm.
+        Formula: alpha * sum(|weights|) 
         Args:
             weights: The weight tensor to calculate the norm for.
         Returns:

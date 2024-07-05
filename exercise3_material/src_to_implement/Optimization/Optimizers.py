@@ -140,6 +140,13 @@ class Adam(Optimizer):
     ) -> np.ndarray:
         """
         Perform a single step of Adam on the given weight tensor.
+        Update weight tensor using the formula:
+        weight_tensor - learning_rate * v_hat / (sqrt(r_hat) + epsilon)
+        where v_hat and r_hat are the bias-corrected first and second moment estimates.
+        
+        If a regularizer is present, the weight tensor is updated using the formula:
+        weight_tensor - learning_rate * v_hat / (sqrt(r_hat) + epsilon) - learning_rate * regularizer.calculate_gradient(weight_tensor)
+                
         Args:
             weight_tensor: The weight tensor to update.
             gradient_tensor: The gradient tensor to use for the update.
