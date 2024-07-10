@@ -3,6 +3,7 @@ import numpy as np
 class L2_Regularizer:
     """
     L2 Regularization class to calculate the gradient of the L2 norm.
+    Also called Ridge regularization.
     """
 
     def __init__(self, alpha: float) -> None:
@@ -33,6 +34,7 @@ class L2_Regularizer:
 class L1_Regularizer:
     """
     L1 Regularization class to calculate the gradient of the L1 norm.
+    Also called Lasso regularization.
     """
 
     def __init__(self, alpha: float) -> None:

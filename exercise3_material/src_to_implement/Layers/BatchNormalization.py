@@ -49,7 +49,7 @@ class BatchNormalization(BaseLayer):
 
     def __init__(self, channels: int) -> None:
         super().__init__()
-        self.channels = channels
+        self.channels = channels  
         self.trainable = True
 
         # initialize weights(gamma) and bias(beta)
@@ -59,15 +59,19 @@ class BatchNormalization(BaseLayer):
 
         # for forward
         self.epsilon = 1e-11  # smaller than 1e-10
+        
+        # store running mean and variance
         self.test_mean = 0
         self.test_var = 1
+       
+        # intermediate values for forward and backward pass
         self.x_tilde = 0
         self.mean = 0
         self.var = 0
-
-        # for backward
         self._gradient_bias = None
         self._gradient_weights = None
+        
+        # optimizer to update the weights and bias
         self._optimizer = None
         self._bias_optimizer = None
 
@@ -143,12 +147,15 @@ class BatchNormalization(BaseLayer):
             np.ndarray
                 The output tensor after applying the batch normalization layer.
         """
-        
+        # save input tensor for backward pass
         self.input_tensor = input_tensor
 
+        # a flag to check if the input tensor is convolutional
         is_conv = len(input_tensor.shape) == 4
         self.is_conv = is_conv
 
+        # determine along which axis to compute mean and variance
+        # in case of convolution, mean and variance are computed along dimension(0), height(2) and width(3)
         mean_ax = 0 if not is_conv else (0, 2, 3)
         var_ax = 0 if not is_conv else (0, 2, 3)
 
@@ -156,7 +163,7 @@ class BatchNormalization(BaseLayer):
         self.var = np.var(input_tensor, axis=var_ax)
 
         if not self.is_conv:
-            if self.testing_phase:
+            if self.testing_phase: # normalizing the input tensor
                 self.x_tilde = (input_tensor - self.test_mean) / np.sqrt(
                     self.test_var + self.epsilon
                 )
@@ -175,6 +182,7 @@ class BatchNormalization(BaseLayer):
                     self.input_tensor - self.test_mean.reshape((1, channels, 1, 1))
                 ) / (self.test_var.reshape((1, channels, 1, 1)) + self.epsilon) ** 0.5
 
+            
             new_mean = np.mean(self.input_tensor, axis=mean_ax)
             new_var = np.var(self.input_tensor, axis=var_ax)
 
@@ -188,10 +196,12 @@ class BatchNormalization(BaseLayer):
             self.mean = new_mean
             self.var = new_var
 
+            # normalize the input tensor using the computed mean and variance
             self.x_tilde = (
                 self.input_tensor - self.mean.reshape((1, channels, 1, 1))
             ) / np.sqrt(self.var.reshape((1, channels, 1, 1)) + self.epsilon)
 
+            # y = weights (gamma) * x_tilde + bias (beta)
             return self.weights.reshape(
                 (1, channels, 1, 1)
             ) * self.x_tilde + self.bias.reshape((1, channels, 1, 1))
@@ -271,6 +281,8 @@ class BatchNormalization(BaseLayer):
                 self.epsilon,
             )
 
+        # calculate gradients for scale(gamma) and shift(beta) parameters using the error tensor and the normalized input tensor
+        # here scale is the weights and shift is the bias
         self.gradient_weights = np.sum(error_tensor * self.x_tilde, axis=axis)
         self.gradient_bias = np.sum(error_tensor, axis=axis)
 
