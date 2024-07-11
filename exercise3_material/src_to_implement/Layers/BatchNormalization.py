@@ -49,7 +49,7 @@ class BatchNormalization(BaseLayer):
 
     def __init__(self, channels: int) -> None:
         super().__init__()
-        self.channels = channels  
+        self.channels = channels
         self.trainable = True
 
         # initialize weights(gamma) and bias(beta)
@@ -59,23 +59,23 @@ class BatchNormalization(BaseLayer):
 
         # for forward
         self.epsilon = 1e-11  # smaller than 1e-10
-        
+
         # store running mean and variance
         self.test_mean = 0
         self.test_var = 1
-       
+
         # intermediate values for forward and backward pass
         self.x_tilde = 0
         self.mean = 0
         self.var = 0
         self._gradient_bias = None
         self._gradient_weights = None
-        
+
         # optimizer to update the weights and bias
         self._optimizer = None
         self._bias_optimizer = None
 
-    # 
+    #
     @property
     def bias_optimizer(self):
         return self._bias_optimizer
@@ -83,7 +83,7 @@ class BatchNormalization(BaseLayer):
     @bias_optimizer.setter
     def bias_optimizer(self, bias_optimizer):
         self._bias_optimizer = bias_optimizer
-        
+
     # property optimizer to get and set the optimizer
     @property
     def optimizer(self):
@@ -110,7 +110,7 @@ class BatchNormalization(BaseLayer):
     @gradient_bias.setter
     def gradient_bias(self, gradient_bias):
         self._gradient_bias = gradient_bias
-        
+
     # initialize the weights and bias of the batch normalization layer
     def initialize(self, weights_initializer: object, bias_initializer: object) -> None:
         self.weights = np.ones(self.channels)
@@ -138,11 +138,11 @@ class BatchNormalization(BaseLayer):
                 test_mean = alpha * mean + (1 - alpha) * new_mean
                 test_var = alpha * var + (1 - alpha) * new_var
                 x_tilde = (input_tensor - mean) / sqrt(var + epsilon)
-        
+
         Args:
             input_tensor: np.ndarray
                 The input tensor for the forward pass.
-                
+
         Returns:
             np.ndarray
                 The output tensor after applying the batch normalization layer.
@@ -163,7 +163,7 @@ class BatchNormalization(BaseLayer):
         self.var = np.var(input_tensor, axis=var_ax)
 
         if not self.is_conv:
-            if self.testing_phase: # normalizing the input tensor
+            if self.testing_phase:  # normalizing the input tensor
                 self.x_tilde = (input_tensor - self.test_mean) / np.sqrt(
                     self.test_var + self.epsilon
                 )
@@ -182,7 +182,6 @@ class BatchNormalization(BaseLayer):
                     self.input_tensor - self.test_mean.reshape((1, channels, 1, 1))
                 ) / (self.test_var.reshape((1, channels, 1, 1)) + self.epsilon) ** 0.5
 
-            
             new_mean = np.mean(self.input_tensor, axis=mean_ax)
             new_var = np.var(self.input_tensor, axis=var_ax)
 
@@ -243,16 +242,16 @@ class BatchNormalization(BaseLayer):
                 dx = dx_tilde / np.sqrt(var + epsilon) + dvar * 2 * (input_tensor - mean) / batch + dmean / batch
                 dgamma = np.sum(error_tensor * x_tilde, axis=axis)
                 dbeta = np.sum(error_tensor, axis=axis)
-        
+
         if optimizer:
             update weights using gradient with respect to weights
         if bias_optimizer:
             update bias using gradient with respect to bias
-        
+
         Args:
             error_tensor: np.ndarray
                 The error tensor for the backward pass.
-                
+
         Returns:
             np.ndarray
                 The error tensor after applying the backward pass.
@@ -301,11 +300,11 @@ class BatchNormalization(BaseLayer):
         """
         It reshapes the tensor to the required shape. If the input tensor is not convolutional, it reshapes the tensor
         to the required shape. If the input tensor is convolutional, it reshapes the tensor to the required shape.
-        
+
         Args:
             tensor: np.ndarray
                 The input tensor to be reshaped.
-                
+
         Returns:
             np.ndarray
                 The reshaped tensor.
