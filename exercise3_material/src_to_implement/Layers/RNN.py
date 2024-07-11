@@ -57,7 +57,9 @@ class RNN(BaseLayer):
         # Initializing the hidden state with zeros
         self.hidden_state = np.zeros((hidden_size))
 
+        # a flag to decide whether to memorize the hidden state across forward passes
         self._memorize = False
+        
         self._optimizer = None
         self._gradient_weights = None
 
@@ -131,27 +133,35 @@ class RNN(BaseLayer):
         Returns:
         output_tensor: np.ndarray - output tensor of shape (batch_size, output_size)
         '''
+        
+        # Clear the intermediate values stored during the forward pass
         self.sigmoid_outputs.clear()
         self.tanh_outputs.clear()
         self.hidden_fcl_input_tensor.clear()
         self.output_fcl_input_tensor.clear()
 
+        # Initialize the hidden state with zeros if memorize is set to False
         previous_hidden_state = (
             self.hidden_state if self.memorize else np.zeros(self.hidden_size)
         )
+        
+        # Get the batch_size from the input tensor and initialize the output tensor with zeros
         batch_size = input_tensor.shape[0]
         output_tensor = np.zeros((batch_size, self.output_size))
 
+        # For each batch_size calculate the forward pass
         for i in range(batch_size):
             combined_input = np.concatenate(
                 (previous_hidden_state, input_tensor[i])
             ).reshape(1, -1)
+            
             hidden_fcl_input = self.hidden_fcl.forward(combined_input)
             tanh_output = self.tanh.forward(hidden_fcl_input)
 
             previous_hidden_state = tanh_output[0]  # tanh_output is a 2D array
 
             output_in = self.output_fcl.forward(tanh_output)
+            
             sigmoid_out = self.sigmoid.forward(output_in)
             output_tensor[i] = sigmoid_out[0]
 
@@ -191,6 +201,8 @@ class RNN(BaseLayer):
         self.output_fcl_gradient_weights = np.zeros_like(self.output_fcl.weights)
 
         gradient_previous_hidden_state = 0 # np.zeros(self.hidden_size)
+        
+        # Get the batch_size from the error tensor and initialize the gradient_wrt_inputs with zeros
         batch_size = error_tensor.shape[0]
         gradient_wrt_inputs = np.zeros((batch_size, self.input_size))
 
