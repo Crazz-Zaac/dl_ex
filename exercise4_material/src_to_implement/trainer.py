@@ -57,7 +57,12 @@ class Trainer:
         # -compute gradient by backward propagation
         # -update weights
         # -return the loss
-        #TODO
+        self._optim.zero_grad() 
+        outputs = self._model(x)
+        loss = self._crit(outputs, y)
+        loss.backward()
+        self._optim.step()
+        return loss
         
         
     
@@ -66,7 +71,12 @@ class Trainer:
         # predict
         # propagate through the network and calculate the loss and predictions
         # return the loss and the predictions
-        #TODO
+        
+        with t.no_grad():
+            outputs = self._model(x)
+            loss = self._crit(outputs, y)
+            preds = t.argmax(outputs, dim=1)
+        return loss, preds
         
     def train_epoch(self):
         # set training mode
