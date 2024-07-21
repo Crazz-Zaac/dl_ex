@@ -6,7 +6,7 @@ from data import ChallengeDataset
 
 class ResBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1):
-        super(ResNet, self).__init__()
+        super(ResBlock, self).__init__()
         self.conv1 = nn.Conv2d(
             in_channels,
             out_channels,
@@ -16,7 +16,8 @@ class ResBlock(nn.Module):
             bias=False,
         )
         self.bn1 = nn.BatchNorm2d(out_channels)
-        self.relu = nn.ReLU(inplace=True)
+
+        self.relu = nn.ReLU()
         self.conv2 = nn.Conv2d(
             out_channels,
             out_channels,
@@ -27,7 +28,6 @@ class ResBlock(nn.Module):
         )
         self.bn2 = nn.BatchNorm2d(out_channels)
 
-        self.skip_connection = nn.Sequential()
         if stride != 1 or in_channels != out_channels:
             self.skip_connection = nn.Sequential(
                 nn.Conv2d(
@@ -39,6 +39,8 @@ class ResBlock(nn.Module):
                 ),
                 nn.BatchNorm2d(out_channels),
             )
+        else:
+            self.skip_connection = nn.Identity()
 
     def forward(self, x):
         identity = self.skip_connection(x)
@@ -56,31 +58,20 @@ class ResBlock(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=2):
+    def __init__(self, block=ResBlock, layers=[2, 2, 2, 2], num_classes=2):
         super(ResNet, self).__init__()
-        self.in_channels = 64
-
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-
-        self.layer1 = self.make_layer(block, 64, layers[0], stride=1)
-        self.layer2 = self.make_layer(block, 128, layers[1], stride=2)
-        self.layer3 = self.make_layer(block, 256, layers[2], stride=2)
-        self.layer4 = self.make_layer(block, 512, layers[3], stride=2)
-
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.resblock1 = ResBlock(64, 64, 1)
+        self.resblock2 = ResBlock(64, 128, 2)
+        self.resblock3 = ResBlock(128, 256, 2)
+        self.resblock4 = ResBlock(256, 512, 2)
+        self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.flatten = nn.Flatten()
         self.fc = nn.Linear(512, num_classes)
         self.sigmoid = nn.Sigmoid()
-
-    def make_layer(self, block, out_channels, blocks, stride):
-        strides = [stride] + [1] * (blocks - 1)
-        layers = []
-        for stride in strides:
-            layers.append(block(self.in_channels, out_channels, stride))
-            self.in_channels = out_channels
-        return nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -88,14 +79,13 @@ class ResNet(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
 
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        x = self.resblock1(x)
+        x = self.resblock2(x)
+        x = self.resblock3(x)
+        x = self.resblock4(x)
 
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
+        x = self.global_avg_pool(x)
+        x = self.flatten(x)
         x = self.fc(x)
         x = self.sigmoid(x)
-
         return x

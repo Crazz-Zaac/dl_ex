@@ -5,6 +5,7 @@ from skimage.io import imread
 from skimage.color import gray2rgb
 import numpy as np
 import torchvision as tv
+import pandas as pd
 
 from typing import Tuple
 
@@ -17,24 +18,35 @@ class ChallengeDataset(Dataset):
     def __init__(self, data: pd.DataFrame, mode: str) ->None:
         self.data = data
         self.mode = mode
-        self.transform = tv.transforms.Compose([
-            tv.transforms.ToPILImage(),
-            tv.transforms.Resize((128, 128)),
-            tv.transforms.ToTensor(),
-            tv.transforms.Normalize(mean=train_mean, std=train_std)
-        ])
+        if mode == 'train':
+            self.transform = tv.transforms.Compose([
+                tv.transforms.ToPILImage(),
+                tv.transforms.RandomHorizontalFlip(),
+                tv.transforms.RandomVerticalFlip(),
+                tv.transforms.RandomRotation(30),
+                tv.transforms.ToTensor(),
+                tv.transforms.Normalize(mean=train_mean, std=train_std)
+            ])
+        else:
+            self.transform = tv.transforms.Compose([
+                tv.transforms.ToPILImage(),
+                tv.transforms.ToTensor(),
+                tv.transforms.Normalize(mean=train_mean, std=train_std)
+            ])
     
     def __len__(self) -> int:
         return len(self.data)
     
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, int]:
-        img_path = self.data.iloc[idx, 0]
-        img = imread(img_path)
-        if len(img.shape) == 2:
-            img = gray2rgb(img)
-        img = self.transform(img)
-        label = self.data.iloc[idx, 1]
-        return img, label
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, int]:
+        filename = self.data.iloc[index, 0]
+        crack = self.data.iloc[index, 1]
+        inactive = self.data.iloc[index, 2]
+        image_path = Path(filename)
+        image = imread(image_path)
+        image = gray2rgb(image)
+        image = self.transform(image)
+        label = torch.tensor([crack, inactive])
+        return image, label
 
     
     
