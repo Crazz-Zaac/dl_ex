@@ -62,7 +62,7 @@ class Trainer:
         loss = self._crit(outputs, y)
         loss.backward()
         self._optim.step()
-        return loss
+        return loss.item()
         
         
     
@@ -76,7 +76,7 @@ class Trainer:
             outputs = self._model(x)
             loss = self._crit(outputs, y)
             preds = t.argmax(outputs, dim=1)
-        return loss, preds
+        return loss,item(), outputs
         
     def train_epoch(self):
         # set training mode
@@ -84,7 +84,14 @@ class Trainer:
         # transfer the batch to "cuda()" -> the gpu if a gpu is given
         # perform a training step
         # calculate the average loss for the epoch and return it
-        #TODO
+        self._model.train()
+        running_loss = 0.0
+        for x, y in tqdm(self._train_dl):
+            if self._cuda:
+                x, y = x.cuda(), y.cuda()
+                loss = self.train_step(x, y)
+            running_loss += loss
+        return running_loss / len(self._train_dl)
     
     def val_test(self):
         # set eval mode. Some layers have different behaviors during training and testing (for example: Dropout, BatchNorm, etc.). To handle those properly, you'd want to call model.eval()
@@ -95,13 +102,39 @@ class Trainer:
         # save the predictions and the labels for each batch
         # calculate the average loss and average metrics of your choice. You might want to calculate these metrics in designated functions
         # return the loss and print the calculated metrics
-        #TODO
+        self._model.eval()
+        val_loss = 0.0
+        all_preds = []
+        all_labels = []
+        with t.no_grad():
+            for x, y in tqdm(self._val_test_dl):
+                if self._cuda:
+                    x, y = x.cuda(), y.cuda()
+                loss, preds = self.val_test_step(x, y)
+                val_loss += loss
+                all_preds.append(preds.cpu())
+                all_labels.append(y.cpu())
+                
+        val_loss /= len(self._val_test_dl)
+        all_preds = t.cat(all_preds)
+        all_labels = t.cat(all_labels)
+        
+        f1 = f1_score(all_labels.numpy(), all_preds.numpy()>0.5, average='samples')
+        print(f'Validation Loss: {val_loss:.4f}, F1 Score: {f1:.4f}')
+        
+        return val_loss, f1
+      
         
     
     def fit(self, epochs=-1):
         assert self._early_stopping_patience > 0 or epochs > 0
         # create a list for the train and validation losses, and create a counter for the epoch 
-        #TODO
+        train_losses = []
+        val_losses = []
+        val_f1s = []
+        best_val_loss = float('inf')
+        best_epoch = 0
+        epochs__no_improvement = 0
         
         while True:
       
@@ -111,8 +144,33 @@ class Trainer:
             # use the save_checkpoint function to save the model (can be restricted to epochs with improvement)
             # check whether early stopping should be performed using the early stopping criterion and stop if so
             # return the losses for both training and validation
-        #TODO
-                    
+            prinf(f'Epoch {epoch + 1}/{epochs if epochs > 0 else "Inf"}')
+            
+            train_loss = self.train_epoch()
+            train_losses.append(train_loss)
+            
+            val_loss, val_f1 = self.val_test()
+            val_losses.append(val_loss)
+            val_f1s.append(val_f1)
+            
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_epoch = epoch
+                self.save_checkpoint(epoch)
+                epochs_no_improvement = 0
+            else:
+                epochs_no_improvement += 1
+                
+            if self._early_stopping_patience > 0 and epochs_no_improvement >= self._early_stopping_patience:
+                print(f'Early stopping at epoch {epoch}')
+                break
+            
+            epoch += 1
+            if epochs > 0 and epoch >= epochs:
+                break
+            
+            self.restore_checkpoint(best_epoch)
+            return train_losses, val_losses, val_f1s
         
         
         
