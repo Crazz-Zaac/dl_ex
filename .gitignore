@@ -14,6 +14,7 @@ DLEx/
 
 # excluding folder
 .venv
+images/
 
 # C extensions
 *.so
